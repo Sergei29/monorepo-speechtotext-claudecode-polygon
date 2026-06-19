@@ -1,9 +1,14 @@
-import { SpeechifyWrapper } from "@repo/speechify-client";
+import { PassThrough, Readable } from "stream";
 import { type NextRequest } from "next/server";
+import { speechify } from "@/lib/speechify";
 
-const speechify = new SpeechifyWrapper();
+const toWebStream = (nodeStream: Readable): ReadableStream<Uint8Array> => {
+  const pass = new PassThrough();
+  nodeStream.pipe(pass);
+  return Readable.toWeb(pass) as ReadableStream<Uint8Array>;
+};
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest): Promise<Response> => {
   let text: string;
   try {
     const body = await request.json();
@@ -12,35 +17,24 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!text || typeof text !== "string" || text.trim().length === 0) {
+  if (!text || typeof text !== "string" || !text.trim()) {
     return Response.json({ error: "text field is required" }, { status: 400 });
   }
 
   try {
-    const result = await speechify.textToSpeech({ text: text.trim() });
+    const nodeStream = await speechify.textToSpeechStream({ text: text.trim() });
+    const webStream = toWebStream(nodeStream);
 
-    const audioBytes = Buffer.from(result.audioData, "base64");
-    const mimeType =
-      result.audioFormat === "mp3"
-        ? "audio/mpeg"
-        : result.audioFormat === "ogg"
-          ? "audio/ogg"
-          : result.audioFormat === "aac"
-            ? "audio/aac"
-            : result.audioFormat === "pcm"
-              ? "audio/pcm"
-              : "audio/wav";
-
-    return new Response(audioBytes, {
+    return new Response(webStream, {
       status: 200,
       headers: {
-        "Content-Type": mimeType,
-        "Content-Length": String(audioBytes.byteLength),
-        "X-Mock-Mode": String(result.mock),
+        "Content-Type": "audio/mpeg",
+        "X-Mock-Mode": String(speechify.isMockMode),
+        "Cache-Control": "no-store",
       },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return Response.json({ error: message }, { status: 500 });
   }
-}
+};

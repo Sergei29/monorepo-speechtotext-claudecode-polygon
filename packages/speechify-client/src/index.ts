@@ -1,9 +1,18 @@
+import { PassThrough, Readable } from "stream";
 import { SpeechifyClient } from "@speechify/api";
+
+const MOCK_AUDIO_URL = "https://samplelib.com/mp3/sample-speech-1m.mp3";
 
 export interface TTSRequest {
   text: string;
   voiceId?: string;
   audioFormat?: "mp3" | "wav" | "ogg" | "aac" | "pcm";
+}
+
+export interface TTSStreamRequest {
+  text: string;
+  voiceId?: string;
+  accept?: "audio/mpeg" | "audio/ogg" | "audio/aac" | "audio/pcm";
 }
 
 export interface TTSResponse {
@@ -17,30 +26,33 @@ export interface SpeechifyWrapperConfig {
   mockMode?: boolean;
 }
 
-function buildMockWav(): string {
-  const sampleRate = 8000;
-  const numSamples = 800; // 0.1s of silence
-  const dataSize = numSamples;
-  const riffSize = 36 + dataSize;
+const fetchMockAsBase64 = async (): Promise<string> => {
+  const res = await fetch(MOCK_AUDIO_URL);
+  if (!res.ok) throw new Error(`Mock audio fetch failed: ${res.status}`);
+  return Buffer.from(await res.arrayBuffer()).toString("base64");
+};
 
-  const buf = Buffer.alloc(44 + dataSize);
-  buf.write("RIFF", 0, "ascii");
-  buf.writeUInt32LE(riffSize, 4);
-  buf.write("WAVE", 8, "ascii");
-  buf.write("fmt ", 12, "ascii");
-  buf.writeUInt32LE(16, 16); // PCM chunk size
-  buf.writeUInt16LE(1, 20);  // PCM format
-  buf.writeUInt16LE(1, 22);  // mono
-  buf.writeUInt32LE(sampleRate, 24);
-  buf.writeUInt32LE(sampleRate, 28); // byte rate (8-bit mono)
-  buf.writeUInt16LE(1, 32);  // block align
-  buf.writeUInt16LE(8, 34);  // bits per sample
-  buf.write("data", 36, "ascii");
-  buf.writeUInt32LE(dataSize, 40);
-  buf.fill(0x80, 44); // unsigned 8-bit silence
+const fetchMockAsStream = async (): Promise<Readable> => {
+  const res = await fetch(MOCK_AUDIO_URL);
+  if (!res.ok) throw new Error(`Mock audio fetch failed: ${res.status}`);
 
-  return buf.toString("base64");
-}
+  const pass = new PassThrough();
+  const reader = res.body!.getReader();
+
+  (async () => {
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) { pass.end(); break; }
+        pass.push(value);
+      }
+    } catch (err) {
+      pass.destroy(err instanceof Error ? err : new Error(String(err)));
+    }
+  })();
+
+  return pass;
+};
 
 export class SpeechifyWrapper {
   private readonly mockMode: boolean;
@@ -61,13 +73,13 @@ export class SpeechifyWrapper {
     }
   }
 
-  async textToSpeech(request: TTSRequest): Promise<TTSResponse> {
+  textToSpeech = async (request: TTSRequest): Promise<TTSResponse> => {
     const { text, voiceId = "george", audioFormat = "mp3" } = request;
 
     if (this.mockMode) {
       return {
-        audioData: buildMockWav(),
-        audioFormat: "wav",
+        audioData: await fetchMockAsBase64(),
+        audioFormat: "mp3",
         mock: true,
       };
     }
@@ -83,7 +95,22 @@ export class SpeechifyWrapper {
       audioFormat: response.audioFormat,
       mock: false,
     };
-  }
+  };
+
+  textToSpeechStream = async (request: TTSStreamRequest): Promise<Readable> => {
+    const { text, voiceId = "george", accept = "audio/mpeg" } = request;
+
+    if (this.mockMode) {
+      return fetchMockAsStream();
+    }
+
+    return this.client!.tts.audio.stream({
+      input: text,
+      voiceId,
+      accept,
+      model: "simba-english"
+    });
+  };
 
   get isMockMode(): boolean {
     return this.mockMode;

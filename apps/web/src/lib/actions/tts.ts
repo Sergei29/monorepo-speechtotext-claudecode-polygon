@@ -1,7 +1,7 @@
 "use server";
 
 import { speechify } from "@/lib/speechify";
-import type {  TtsState } from "@/types";
+import type { TtsState } from "@/types";
 import { initialTtsState } from "@/constants";
 
 export const ttsAction = async (

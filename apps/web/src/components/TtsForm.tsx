@@ -1,16 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
-
-import { ttsAction } from "@/lib/actions/tts";
-import { initialTtsState } from "@/constants";
+import { useState } from "react";
 import { AudioPlayer } from "@/components/AudioPlayer";
 
 export const TtsForm = () => {
-  const [state, formAction, isPending] = useActionState(ttsAction, initialTtsState);
+  const [activeText, setActiveText] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const text = (new FormData(e.currentTarget)).get("text") as string;
+    if (!text?.trim()) return;
+    setError(null);
+    setActiveText(text.trim());
+  };
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <textarea
         name="text"
         placeholder="Enter text to convert to speech..."
@@ -21,23 +27,24 @@ export const TtsForm = () => {
 
       <button
         type="submit"
-        disabled={isPending}
-        className="w-full rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+        className="w-full rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
       >
-        {isPending ? "Generating..." : "Convert to Speech"}
+        Convert to Speech
       </button>
 
-      {state.error && (
+      {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
-          {state.error}
+          {error}
         </div>
       )}
 
-      {state.audioData && (
+      {activeText && (
         <AudioPlayer
-          audioData={state.audioData}
-          audioFormat={state.audioFormat}
-          mock={state.mock}
+          text={activeText}
+          onError={(message) => {
+            setError(message);
+            setActiveText(null);
+          }}
         />
       )}
     </form>
