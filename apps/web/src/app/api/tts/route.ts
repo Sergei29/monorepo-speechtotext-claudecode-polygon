@@ -8,6 +8,9 @@ const toWebStream = (nodeStream: Readable): ReadableStream<Uint8Array> => {
   return Readable.toWeb(pass) as ReadableStream<Uint8Array>;
 };
 
+// Node.js runtime required — speechify-client uses Node.js 'stream' internally
+export const runtime = "nodejs";
+
 export const POST = async (request: NextRequest): Promise<Response> => {
   let text: string;
   try {

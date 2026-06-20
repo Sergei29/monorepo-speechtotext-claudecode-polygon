@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { streamAudioToSourceBuffer } from "@/lib/streamAudio";
 
 interface AudioPlayerProps {
   text: string;
@@ -34,52 +35,20 @@ export const AudioPlayer = ({ text, onError }: AudioPlayerProps) => {
 
       if (aborted) return;
 
-      const mimeType = "audio/mpeg";
-      if (!MediaSource.isTypeSupported(mimeType)) {
-        throw new Error(`${mimeType} is not supported by MediaSource in this browser`);
-      }
+      const sourceBuffer = mediaSource.addSourceBuffer("audio/mpeg");
 
-      const sourceBuffer = mediaSource.addSourceBuffer(mimeType);
-
-      const response = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-
-      if (!response.ok || !response.body) {
-        const msg = await response.text().catch(() => `HTTP ${response.status}`);
-        throw new Error(msg);
-      }
-
-      setIsMock(response.headers.get("X-Mock-Mode") === "true");
-
-      const reader = response.body.getReader();
-      let firstChunk = true;
-
-      const waitForUpdateEnd = () =>
-        new Promise<void>((resolve) => {
-          sourceBuffer.addEventListener("updateend", () => resolve(), { once: true });
-        });
-
-      while (!aborted) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        if (sourceBuffer.updating) await waitForUpdateEnd();
-        if (aborted) break;
-        sourceBuffer.appendBuffer(value);
-        if (firstChunk) {
-          firstChunk = false;
+      await streamAudioToSourceBuffer({
+        text,
+        sourceBuffer,
+        mediaSource,
+        signal: { get aborted() { return aborted; } },
+        onFirstChunk: () => {
           audio.play().catch((err: Error) => {
             if (err.name !== "AbortError") console.error(err);
           });
-        }
-      }
-
-      if (!aborted) {
-        if (sourceBuffer.updating) await waitForUpdateEnd();
-        mediaSource.endOfStream();
-      }
+        },
+        onMockMode: setIsMock,
+      });
     };
 
     run().catch((err: Error) => {
