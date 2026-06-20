@@ -8,5 +8,6 @@
     "**/.cache/**",
     "**/.vscode/**",
     "*.yaml"
-  ]
+  ],
+  "cSpell.words": ["llms"]
 }
