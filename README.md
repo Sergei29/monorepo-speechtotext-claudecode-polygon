@@ -34,7 +34,24 @@ CRITICAL OPERATIONAL RULES FOR THIS SESSION:
 Acknowledge these rules, then run the existing E2E tests for the client app using the appropriate pnpm filter command to verify everything passes out of the box.
 ```
 
-### Step 2: Data Schema Definition (Minute 5–20)
+### Step 2: Create the Source of Truth Feature Task File
+
+Once I know what is the feature details when I open the scheduled speechify test - in order to save on time, context and tokens, will create a task description md file which claude could consult and return to throughout whole duration for the task.
+
+```sh
+touch apps/client-user/TASK.md
+```
+
+- Then into the TASK.md file: Paste the exact assignment requirements, UI/UX states, and acceptance criteria into this file as a markdown checkbox list.
+- Once Claude is showing that initial tests have run ok, add another prompt to specify this task file
+
+```sh
+I have created the master specification document at `apps/client-user/TASK.md`.
+
+Read this file completely. For the rest of this entire 90-minute session, treat `TASK.md` as our absolute source of truth. Before proposing any changes or moving between phases, verify that your plan aligns 100% with the requirements detailed in that document.
+```
+
+### Step 3: Data Schema Definition (Minute 5–20)
 
 Before touching the UI. Define the data contracts in the proto package.
 
@@ -48,7 +65,7 @@ Do not modify any other packages yet. Present your schema plan first."
 If no pre-commit checks, Manually run format, lint, type checks and build application,
 Then Commit and Push
 
-### Step 3: Server Function Stubbing & UI Layout (Minute 20–60)
+### Step 4: Server Function Stubbing & UI Layout (Minute 20–60)
 
 This merges your state, stubs, and UI layout into a single unified execution loop inside your allowed client application directory.
 
@@ -63,7 +80,7 @@ Present your file implementation plan for my review before writing any code."
 If no pre-commit checks, Manually run format, lint, type checks and build application,
 Then Commit and Push
 
-### Step 4: E2E Test Implementation & Validation (Minute 60–80)
+### Step 5: E2E Test Implementation & Validation (Minute 60–80)
 
 ```sh
 /plan "Now that the feature is functioning with our server stubs, locate the existing E2E testing framework inside `apps/client-user/` (Playwright/Cypress).
@@ -75,7 +92,7 @@ Then Commit and Push
 If no pre-commit checks, Manually run format, lint, type checks and build application,
 Then Commit and Push
 
-### Step 5: Final Sanity Check & Push (Minute 80–90)
+### Step 6: Final Sanity Check & Push (Minute 80–90)
 
 Final manual QA, final Commit and Push if needed
 Verify line-by-line that no files outside apps/client-user/ and packages/proto/ were touched.
