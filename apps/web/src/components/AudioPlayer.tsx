@@ -41,7 +41,11 @@ export const AudioPlayer = ({ text, onError }: AudioPlayerProps) => {
         text,
         sourceBuffer,
         mediaSource,
-        signal: { get aborted() { return aborted; } },
+        signal: {
+          get aborted() {
+            return aborted;
+          },
+        },
         onFirstChunk: () => {
           audio.play().catch((err: Error) => {
             if (err.name !== "AbortError") console.error(err);
@@ -61,7 +65,11 @@ export const AudioPlayer = ({ text, onError }: AudioPlayerProps) => {
       audio.removeAttribute("src");
       audio.load();
       if (mediaSource.readyState === "open") {
-        try { mediaSource.endOfStream(); } catch { /* already closed */ }
+        try {
+          mediaSource.endOfStream();
+        } catch {
+          /* already closed */
+        }
       }
     };
   }, [text]);

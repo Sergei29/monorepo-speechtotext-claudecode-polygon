@@ -43,7 +43,10 @@ const fetchMockAsStream = async (): Promise<Readable> => {
     try {
       while (true) {
         const { done, value } = await reader.read();
-        if (done) { pass.end(); break; }
+        if (done) {
+          pass.end();
+          break;
+        }
         pass.push(value);
       }
     } catch (err) {
@@ -59,8 +62,7 @@ export class SpeechifyWrapper {
   private client: SpeechifyClient | null = null;
 
   constructor(config: SpeechifyWrapperConfig = {}) {
-    this.mockMode =
-      config.mockMode ?? process.env.SPEECHIFY_MOCK_MODE === "true";
+    this.mockMode = config.mockMode ?? process.env.SPEECHIFY_MOCK_MODE === "true";
 
     if (!this.mockMode) {
       const apiKey = config.apiKey ?? process.env.SPEECHIFY_API_KEY;
@@ -108,7 +110,7 @@ export class SpeechifyWrapper {
       input: text,
       voiceId,
       accept,
-      model: "simba-english"
+      model: "simba-english",
     });
   };
 

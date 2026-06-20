@@ -33,10 +33,7 @@ export const TtsActionForm = () => {
       )}
 
       {state.audioData && (
-        <AudioPlayerStatic
-          audioData={state.audioData}
-          audioFormat={state.audioFormat}
-        />
+        <AudioPlayerStatic audioData={state.audioData} audioFormat={state.audioFormat} />
       )}
     </form>
   );

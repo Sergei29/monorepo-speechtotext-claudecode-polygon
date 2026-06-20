@@ -4,10 +4,7 @@ import { speechify } from "@/lib/speechify";
 import type { TtsState } from "@/types";
 import { initialTtsState } from "@/constants";
 
-export const ttsAction = async (
-  _prevState: TtsState,
-  formData: FormData
-): Promise<TtsState> => {
+export const ttsAction = async (_prevState: TtsState, formData: FormData): Promise<TtsState> => {
   const text = formData.get("text");
 
   if (!text || typeof text !== "string" || !text.trim()) {

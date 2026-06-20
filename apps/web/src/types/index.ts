@@ -4,4 +4,3 @@ export interface TtsState {
   mock: boolean;
   error: string | null;
 }
-

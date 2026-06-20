@@ -8,9 +8,7 @@ const links = [
 export const Navbar = () => (
   <nav className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
     <div className="mx-auto flex max-w-xl items-center gap-6 px-6 py-4">
-      <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-        Speechify
-      </span>
+      <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Speechify</span>
       <div className="flex gap-4">
         {links.map(({ href, label }) => (
           <Link

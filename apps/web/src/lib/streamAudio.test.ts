@@ -31,7 +31,11 @@ function makeMediaSource() {
 
 function makeResponse(
   body: ReadableStream<Uint8Array> | null,
-  { ok = true, status = 200, mockMode = null }: { ok?: boolean; status?: number; mockMode?: string | null } = {}
+  {
+    ok = true,
+    status = 200,
+    mockMode = null,
+  }: { ok?: boolean; status?: number; mockMode?: string | null } = {}
 ): Response {
   return {
     ok,
@@ -96,9 +100,11 @@ describe("streamAudioToSourceBuffer", () => {
   it("calls onFirstChunk exactly once regardless of chunk count", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(
-        makeResponse(makeStream(new Uint8Array([1]), new Uint8Array([2]), new Uint8Array([3])))
-      )
+      vi
+        .fn()
+        .mockResolvedValue(
+          makeResponse(makeStream(new Uint8Array([1]), new Uint8Array([2]), new Uint8Array([3])))
+        )
     );
 
     const onFirstChunk = vi.fn();

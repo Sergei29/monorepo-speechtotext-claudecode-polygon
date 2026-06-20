@@ -18,13 +18,8 @@ export const metadata: Metadata = {
   description: "Text to speech powered by Speechify",
 };
 
-const RootLayout = ({
-  children,
-}: Readonly<{ children: React.ReactNode }>) => (
-  <html
-    lang="en"
-    className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-  >
+const RootLayout = ({ children }: Readonly<{ children: React.ReactNode }>) => (
+  <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
     <body className="min-h-full flex flex-col">
       <Navbar />
       {children}

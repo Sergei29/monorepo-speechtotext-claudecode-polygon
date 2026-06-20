@@ -9,7 +9,7 @@ export const TtsForm = () => {
 
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const text = (new FormData(e.currentTarget)).get("text") as string;
+    const text = new FormData(e.currentTarget).get("text") as string;
     if (!text?.trim()) return;
     setError(null);
     setActiveText(text.trim());

@@ -24,7 +24,12 @@ describe("AudioPlayer", () => {
   beforeEach(() => {
     mockStream.mockReset();
     mockStream.mockResolvedValue(undefined);
-    vi.stubGlobal("MediaSource", vi.fn(function () { return makeMockMediaSource(); }));
+    vi.stubGlobal(
+      "MediaSource",
+      vi.fn(function () {
+        return makeMockMediaSource();
+      })
+    );
     URL.createObjectURL = vi.fn().mockReturnValue("blob:fake");
     URL.revokeObjectURL = vi.fn();
     vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
@@ -49,9 +54,7 @@ describe("AudioPlayer", () => {
     render(<AudioPlayer text="hello world" onError={vi.fn()} />);
 
     await waitFor(() => {
-      expect(mockStream).toHaveBeenCalledWith(
-        expect.objectContaining({ text: "hello world" })
-      );
+      expect(mockStream).toHaveBeenCalledWith(expect.objectContaining({ text: "hello world" }));
     });
   });
 

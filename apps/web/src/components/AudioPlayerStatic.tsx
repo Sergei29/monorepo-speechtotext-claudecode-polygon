@@ -9,11 +9,16 @@ interface AudioPlayerStaticProps {
 
 const mimeForFormat = (format: string): string => {
   switch (format) {
-    case "mp3": return "audio/mpeg";
-    case "ogg": return "audio/ogg";
-    case "aac": return "audio/aac";
-    case "pcm": return "audio/pcm";
-    default:    return "audio/wav";
+    case "mp3":
+      return "audio/mpeg";
+    case "ogg":
+      return "audio/ogg";
+    case "aac":
+      return "audio/aac";
+    case "pcm":
+      return "audio/pcm";
+    default:
+      return "audio/wav";
   }
 };
 
