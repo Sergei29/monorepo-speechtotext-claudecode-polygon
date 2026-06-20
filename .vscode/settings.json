@@ -1,0 +1,12 @@
+{
+  "cSpell.ignorePaths": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/.nuxt/**",
+    "**/.cache/**",
+    "**/.vscode/**",
+    "*.yaml"
+  ]
+}
